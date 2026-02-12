@@ -1,29 +1,32 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+connected_clients = []
 
 @app.get("/")
-def home():
-    return {"message": "Server Running"}
+async def get():
+    with open("index.html", "r") as f:
+        return HTMLResponse(f.read())
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    print("ESP Connected")
+    connected_clients.append(websocket)
+    print("Client Connected")
 
     try:
         while True:
             data = await websocket.receive_text()
-            print("Received:", data)
-            await websocket.send_text("Data Received")
-    except:
-        print("Client disconnected")
+            print("Received from ESP:", data)
+
+            # Broadcast to all connected browsers
+            for client in connected_clients:
+                await client.send_text(f"new_data:{data}")
+
+    except WebSocketDisconnect:
+        print("Client Disconnected")
+        connected_clients.remove(websocket)
