@@ -4,10 +4,11 @@
     <title>Full Data History</title>
     <style>
         body { font-family: Arial; padding:20px; }
-        table { width:100%; border-collapse: collapse; }
+        table { width:100%; border-collapse: collapse; margin-top:20px; }
         th, td { border:1px solid #ddd; padding:8px; text-align:center; }
         th { background:#f2f2f2; }
-        button { padding:10px; margin-top:10px; }
+        button { padding:10px; margin:10px 5px 10px 0; cursor:pointer; }
+        input { padding:5px; margin-right:10px; }
     </style>
 </head>
 <body>
@@ -20,11 +21,11 @@
 <label>End Time:</label>
 <input type="datetime-local" id="endTime">
 
-<button onclick="loadFilteredData()">Apply Filter</button>
+<br>
 
-<button onclick="window.location.href='/'">
-    Back to Dashboard
-</button>
+<button onclick="applyFilter()">Apply Filter</button>
+<button onclick="downloadData()">Download Selected Data</button>
+<button onclick="window.location.href='/'">Back to Dashboard</button>
 
 <hr>
 
@@ -32,22 +33,10 @@
     <thead>
         <tr>
             <th>Timestamp</th>
-            <th>Sensor 1</th>
-            <th>Sensor 2</th>
-            <th>Sensor 3</th>
-            <th>Sensor 4</th>
-            <th>Sensor 5</th>
-            <th>Sensor 6</th>
-            <th>Sensor 7</th>
-            <th>Sensor 8</th>
-            <th>Sensor 9</th>
-            <th>Sensor 10</th>
-            <th>Sensor 11</th>
-            <th>Sensor 12</th>
-            <th>Sensor 13</th>
-            <th>Sensor 14</th>
-            <th>Sensor 15</th>
-            <th>Sensor 16</th>
+            <th>Sensor 1</th><th>Sensor 2</th><th>Sensor 3</th><th>Sensor 4</th>
+            <th>Sensor 5</th><th>Sensor 6</th><th>Sensor 7</th><th>Sensor 8</th>
+            <th>Sensor 9</th><th>Sensor 10</th><th>Sensor 11</th><th>Sensor 12</th>
+            <th>Sensor 13</th><th>Sensor 14</th><th>Sensor 15</th><th>Sensor 16</th>
         </tr>
     </thead>
     <tbody id="historyBody"></tbody>
@@ -55,60 +44,24 @@
 
 <script>
 
-async function loadHistory() {
-    const response = await fetch('/history');
-    const data = await response.json();
+let autoRefresh;
 
-    const body = document.getElementById("historyBody");
-    body.innerHTML = "";
-
-    data.history.forEach(row => {
-        let tr = "<tr><td>" + row.timestamp + "</td>";
-        row.values.forEach(val => {
-            tr += "<td>" + val.toFixed(2) + "</td>";
-        });
-        tr += "</tr>";
-        body.innerHTML += tr;
-    });
+// Convert datetime-local to server format
+function formatDateTime(value) {
+    if (!value) return null;
+    return value.replace("T", " ") + ":00";
 }
 
-function downloadData() {
-    const start = document.getElementById("startTime").value;
-    const end = document.getElementById("endTime").value;
-
-    if (!start || !end) {
-        alert("Select start and end time");
-        return;
-    }
-
-    window.location.href = `/download?start=${start}&end=${end}`;
-}
-
-setInterval(loadHistory, 2000);
-loadHistory();
-
-</script>
-
-    <script>
-
-async function loadFilteredData() {
-
-    const startInput = document.getElementById("startTime").value;
-    const endInput = document.getElementById("endTime").value;
+// Load history from server
+async function loadHistory(start=null, end=null) {
 
     let url = "/history";
 
-    if (startInput || endInput) {
+    if (start || end) {
         url += "?";
-        if (startInput) {
-            url += "start=" + startInput.replace("T", " ") + ":00";
-        }
-        if (startInput && endInput) {
-            url += "&";
-        }
-        if (endInput) {
-            url += "end=" + endInput.replace("T", " ") + ":00";
-        }
+        if (start) url += "start=" + start;
+        if (start && end) url += "&";
+        if (end) url += "end=" + end;
     }
 
     const response = await fetch(url);
@@ -117,10 +70,9 @@ async function loadFilteredData() {
     const body = document.getElementById("historyBody");
     body.innerHTML = "";
 
-    data.history.forEach((record, index) => {
+    data.history.forEach(record => {
 
         let row = "<tr>";
-        row += "<td>" + (index + 1) + "</td>";
         row += "<td>" + record.timestamp + "</td>";
 
         record.values.forEach(value => {
@@ -133,10 +85,42 @@ async function loadFilteredData() {
     });
 }
 
-window.onload = loadFilteredData;
+// Apply filter button
+function applyFilter() {
+
+    const start = formatDateTime(document.getElementById("startTime").value);
+    const end = formatDateTime(document.getElementById("endTime").value);
+
+    clearInterval(autoRefresh);  // Stop auto refresh when filtering
+    loadHistory(start, end);
+}
+
+// Download selected data
+function downloadData() {
+
+    const start = formatDateTime(document.getElementById("startTime").value);
+    const end = formatDateTime(document.getElementById("endTime").value);
+
+    let url = "/download";
+
+    if (start || end) {
+        url += "?";
+        if (start) url += "start=" + start;
+        if (start && end) url += "&";
+        if (end) url += "end=" + end;
+    }
+
+    window.location.href = url;
+}
+
+// Auto refresh every 2 sec (only when no filter applied)
+autoRefresh = setInterval(() => {
+    loadHistory();
+}, 2000);
+
+loadHistory();
 
 </script>
-
 
 </body>
 </html>
