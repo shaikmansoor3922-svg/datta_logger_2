@@ -187,18 +187,27 @@ setInterval(async () => {
 }, 1000);
 
 // Device Status
+let lastDataTime = Date.now();
+
 setInterval(async () => {
-    const response = await fetch('/status');
+    const response = await fetch('/latest');
     const data = await response.json();
+
+    if (data.values && data.values.length === 16) {
+        updateDashboard(data.values);
+        lastDataTime = Date.now();
+    }
+
     const status = document.getElementById("deviceStatus");
 
-    if (data.device === "connected") {
+    if (Date.now() - lastDataTime < 3000) {
         status.textContent = "🟢 Device Connected";
         status.style.color = "green";
     } else {
         status.textContent = "🔴 Device Disconnected";
         status.style.color = "red";
     }
+
 }, 500);
 
 createCharts();
