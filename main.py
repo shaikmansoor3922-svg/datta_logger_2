@@ -86,3 +86,15 @@ def download_data(start: str, end: str):
                 writer.writerow([row["timestamp"]] + row["values"])
 
     return FileResponse(filename, media_type="text/csv", filename="sensor_data.csv")
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard():
+    with open("dashboard.html") as f:
+        return f.read()
+
+
+@app.get("/history_page", response_class=HTMLResponse)
+def history_page():
+    with open("history.html") as f:
+        return f.read()
+
