@@ -90,7 +90,7 @@ def device_status():
         return {"device": "disconnected"}
 
     # If no data for 5 seconds → disconnected
-    if time.time() - last_update_time > 5:
+    if time.time() - last_update_time > 3:
         return {"device": "disconnected"}
     else:
         return {"device": "connected"}
