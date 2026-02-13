@@ -1,39 +1,26 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
-connected_clients = []
+# Store latest sensor values
+latest_data = []
+
+class SensorData(BaseModel):
+    values: List[float]
 
 @app.get("/")
-async def get():
-    with open("index.html", "r") as f:
-        return HTMLResponse(f.read())
+def home():
+    return {"status": "Server Running"}
 
+@app.post("/upload")
+def upload_data(data: SensorData):
+    global latest_data
+    latest_data = data.values
+    print("Received:", latest_data)
+    return {"message": "Data received successfully"}
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    connected_clients.append(websocket)
-    print("Client Connected")
-
-    try:
-        while True:
-            data = await websocket.receive_text()
-            print("Received from ESP:", data)
-
-            # Send to all connected browser clients
-            for client in connected_clients:
-                try:
-                    await client.send_text(f"new_data:{data}")
-                except:
-                    pass
-
-    except WebSocketDisconnect:
-        print("Client Disconnected")
-        connected_clients.remove(websocket)
-    except Exception as e:
-        print("WebSocket Error:", e)
-        if websocket in connected_clients:
-            connected_clients.remove(websocket)
+@app.get("/latest")
+def get_latest():
+    return {"values": latest_data}
