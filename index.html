@@ -116,15 +116,15 @@
             }
         }
 
-        // Connect to WebSocket
-       const ws = new WebSocket(`wss://${window.location.host}/ws`);
-        
-        ws.onmessage = function(event) {
-            if (event.data.startsWith('new_data:')) {
-                const data = event.data.substring(9).split(',').map(Number);
-                updateDashboard(data);
-            }
-        };
+      setInterval(async () => {
+    const response = await fetch('/latest');
+    const data = await response.json();
+    
+    if (data.values && data.values.length === 16) {
+        updateDashboard(data.values);
+    }
+}, 1000);
+
 
         function updateDashboard(data) {
             // Update table
