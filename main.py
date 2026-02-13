@@ -29,13 +29,18 @@ def dashboard(request: Request):
 # ESP POSTS HERE
 @app.post("/upload")
 def upload_data(data: SensorData):
-    global latest_data, all_data, last_update_time
+    global latest_data, history_data, last_update_time
 
     latest_data = data.values
-    all_data.append(data.values)
+    history_data.append({
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "values": data.values
+    })
+
     last_update_time = time.time()
 
-    return {"message": "Data received"}
+    return {"message": "Data received successfully"}
+
 
 
 # Dashboard fetches live data
@@ -47,7 +52,7 @@ def get_latest():
 # Dashboard fetches full history
 @app.get("/history")
 def get_history():
-    return {"history": all_data}
+    return {"history": history_data}
 
 
 @app.get("/status")
@@ -60,3 +65,24 @@ def get_status():
     else:
         return {"device": "disconnected"}
 
+@app.get("/download")
+def download_data(start: str, end: str):
+
+    start_dt = datetime.strptime(start, "%Y-%m-%dT%H:%M")
+    end_dt = datetime.strptime(end, "%Y-%m-%dT%H:%M")
+
+    filename = "filtered_data.csv"
+
+    with open(filename, mode="w", newline="") as file:
+        writer = csv.writer(file)
+
+        header = ["Timestamp"] + [f"Sensor {i}" for i in range(1, 17)]
+        writer.writerow(header)
+
+        for row in history_data:
+            row_time = datetime.strptime(row["timestamp"], "%Y-%m-%d %H:%M:%S")
+
+            if start_dt <= row_time <= end_dt:
+                writer.writerow([row["timestamp"]] + row["values"])
+
+    return FileResponse(filename, media_type="text/csv", filename="sensor_data.csv")
