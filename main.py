@@ -13,42 +13,42 @@ import time
 
 app = FastAPI()
 
-# -------------------------
-# GLOBAL STORAGE
-# -------------------------
+templates = Jinja2Templates(directory="templates")
+
+# ------------------------
+# STORAGE
+# ------------------------
 latest_data = []
 history_data = []
 last_update_time = 0
 
 
-# -------------------------
-# DATA MODEL
-# -------------------------
+# ------------------------
+# MODEL
+# ------------------------
 class SensorData(BaseModel):
     values: List[float]
 
 
-# -------------------------
-# ROOT (Dashboard Page)
-# -------------------------
+# ------------------------
+# DASHBOARD PAGE
+# ------------------------
 @app.get("/", response_class=HTMLResponse)
-def dashboard():
-    with open("dashboard.html", "r") as f:
-        return f.read()
+def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
-# -------------------------
+# ------------------------
 # HISTORY PAGE
-# -------------------------
+# ------------------------
 @app.get("/historypage", response_class=HTMLResponse)
-def history_page():
-    with open("history.html", "r") as f:
-        return f.read()
+def history_page(request: Request):
+    return templates.TemplateResponse("history.html", {"request": request})
 
 
-# -------------------------
-# RECEIVE DATA FROM ESP
-# -------------------------
+# ------------------------
+# RECEIVE DATA
+# ------------------------
 @app.post("/upload")
 def upload_data(data: SensorData):
     global latest_data, history_data, last_update_time
@@ -65,32 +65,28 @@ def upload_data(data: SensorData):
     return {"message": "Data received successfully"}
 
 
-# -------------------------
-# GET LATEST VALUES
-# -------------------------
+# ------------------------
+# LATEST DATA
+# ------------------------
 @app.get("/latest")
 def get_latest():
     return {"values": latest_data}
 
 
-# -------------------------
-# GET FULL HISTORY
-# -------------------------
+# ------------------------
+# FULL HISTORY
+# ------------------------
 @app.get("/history")
 def get_history():
     return {"history": history_data}
 
 
-# -------------------------
-# DEVICE STATUS CHECK
-# -------------------------
+# ------------------------
+# DEVICE STATUS
+# ------------------------
 @app.get("/status")
 def device_status():
-    global last_update_time
-
     if time.time() - last_update_time < 3:
         return {"device": "connected"}
     else:
         return {"device": "disconnected"}
-
-
