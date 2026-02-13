@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Full Data History</title>
+    <style>
+        body { font-family: Arial; padding:20px; }
+        table { width:100%; border-collapse: collapse; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+        th { background:#f2f2f2; }
+        button { padding:10px; margin-top:10px; }
+    </style>
+</head>
+<body>
+
+<h2>Full Sensor History</h2>
+
+<label>Start Time:</label>
+<input type="datetime-local" id="startTime">
+
+<label>End Time:</label>
+<input type="datetime-local" id="endTime">
+
+<button onclick="downloadData()">Download Selected Data</button>
+<button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+
+<br><br>
+
+<table>
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Sensor 1</th>
+            <th>Sensor 2</th>
+            <th>Sensor 3</th>
+            <th>Sensor 4</th>
+            <th>Sensor 5</th>
+            <th>Sensor 6</th>
+            <th>Sensor 7</th>
+            <th>Sensor 8</th>
+            <th>Sensor 9</th>
+            <th>Sensor 10</th>
+            <th>Sensor 11</th>
+            <th>Sensor 12</th>
+            <th>Sensor 13</th>
+            <th>Sensor 14</th>
+            <th>Sensor 15</th>
+            <th>Sensor 16</th>
+        </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+</table>
+
+<script>
+
+async function loadHistory() {
+    const response = await fetch('/history');
+    const data = await response.json();
+
+    const body = document.getElementById("historyBody");
+    body.innerHTML = "";
+
+    data.history.forEach(row => {
+        let tr = "<tr><td>" + row.timestamp + "</td>";
+        row.values.forEach(val => {
+            tr += "<td>" + val.toFixed(2) + "</td>";
+        });
+        tr += "</tr>";
+        body.innerHTML += tr;
+    });
+}
+
+function downloadData() {
+    const start = document.getElementById("startTime").value;
+    const end = document.getElementById("endTime").value;
+
+    if (!start || !end) {
+        alert("Select start and end time");
+        return;
+    }
+
+    window.location.href = `/download?start=${start}&end=${end}`;
+}
+
+setInterval(loadHistory, 2000);
+loadHistory();
+
+</script>
+
+</body>
+</html>
