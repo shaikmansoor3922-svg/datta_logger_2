@@ -11,6 +11,37 @@
         input { padding:5px; margin-right:10px; }
     </style>
 </head>
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>Full Data History</title>
+    <style>
+        body { font-family: Arial; padding:20px; }
+
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+
+        .logo {
+            height:60px;
+        }
+
+        table { width:100%; border-collapse: collapse; margin-top:20px; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+        th { background:#f2f2f2; }
+        button { padding:10px; margin:10px 5px 10px 0; cursor:pointer; }
+        input { padding:5px; margin-right:10px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Filter Data By Time</h2>
+    <img src="/static/mechnerve.png" class="logo">
+</div>
+
 <body>
 
 <h2>Filter Data By Time</h2>
@@ -25,7 +56,7 @@
 
 <button onclick="applyFilter()">Apply Filter</button>
 <button onclick="downloadData()">Download Selected Data</button>
-<button onclick="window.location.href='/'">Back to Dashboard</button>
+<button onclick="goDashboard()">Back to Dashboard</button>
 
 <hr>
 
@@ -46,13 +77,13 @@
 
 let autoRefresh;
 
-// Convert datetime-local to server format
+// Convert datetime-local to backend format
 function formatDateTime(value) {
     if (!value) return null;
     return value.replace("T", " ") + ":00";
 }
 
-// Load history from server
+// Load history
 async function loadHistory(start=null, end=null) {
 
     let url = "/history";
@@ -85,17 +116,17 @@ async function loadHistory(start=null, end=null) {
     });
 }
 
-// Apply filter button
+// Apply Filter Button
 function applyFilter() {
 
     const start = formatDateTime(document.getElementById("startTime").value);
     const end = formatDateTime(document.getElementById("endTime").value);
 
-    clearInterval(autoRefresh);  // Stop auto refresh when filtering
+    clearInterval(autoRefresh); // stop auto refresh
     loadHistory(start, end);
 }
 
-// Download selected data
+// Download Button
 function downloadData() {
 
     const start = formatDateTime(document.getElementById("startTime").value);
@@ -113,11 +144,24 @@ function downloadData() {
     window.location.href = url;
 }
 
-// Auto refresh every 2 sec (only when no filter applied)
+// Back button
+function goDashboard() {
+    window.location.href = "/";
+}
+
+// Auto refresh every 2 seconds (only if no filter applied)
 autoRefresh = setInterval(() => {
-    loadHistory();
+
+    const start = document.getElementById("startTime").value;
+    const end = document.getElementById("endTime").value;
+
+    if (!start && !end) {
+        loadHistory();
+    }
+
 }, 2000);
 
+// Initial load
 loadHistory();
 
 </script>
