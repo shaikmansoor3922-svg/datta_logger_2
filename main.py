@@ -89,12 +89,18 @@ def get_history(start: str = Query(None), end: str = Query(None)):
     filtered = []
 
     for record in history_data:
-        record_time = record["timestamp"]
 
-        if start and record_time < start:
-            continue
-        if end and record_time > end:
-            continue
+        record_time = datetime.strptime(record["timestamp"], "%Y-%m-%d %H:%M:%S")
+
+        if start:
+            start_time = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+            if record_time < start_time:
+                continue
+
+        if end:
+            end_time = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+            if record_time > end_time:
+                continue
 
         filtered.append(record)
 
