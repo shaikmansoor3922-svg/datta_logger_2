@@ -137,22 +137,6 @@
     </table>
 
     <!-- HISTORY TABLE (Hidden Initially) -->
-    <div class="history-container" id="historyContainer">
-        <h3>Full Data History</h3>
-        <table class="data-table" id="historyTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Sensor 1</th><th>Sensor 2</th><th>Sensor 3</th><th>Sensor 4</th>
-                    <th>Sensor 5</th><th>Sensor 6</th><th>Sensor 7</th><th>Sensor 8</th>
-                    <th>Sensor 9</th><th>Sensor 10</th><th>Sensor 11</th><th>Sensor 12</th>
-                    <th>Sensor 13</th><th>Sensor 14</th><th>Sensor 15</th><th>Sensor 16</th>
-                </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-        </table>
-    </div>
-
     <div class="grid-container" id="chartsContainer"></div>
 
 <script>
@@ -227,24 +211,6 @@ setInterval(async () => {
     }
 }, 300);
 
-// Load History Data
-setInterval(async () => {
-    const response = await fetch('/history');
-    const data = await response.json();
-
-    const body = document.getElementById("historyBody");
-    body.innerHTML = "";
-
-    data.history.forEach((row, index) => {
-        let tr = "<tr><td>" + (index + 1) + "</td>";
-        row.forEach(val => {
-            tr += "<td>" + val.toFixed(2) + "</td>";
-        });
-        tr += "</tr>";
-        body.innerHTML += tr;
-    });
-
-}, 1000);
 
 // Device Status
 // Device Status (Correct Method)
