@@ -81,22 +81,28 @@ upload_counter = 0
 
 @app.post("/upload")
 def upload_data(data: SensorData):
-    global latest_data, history_data, last_update_time, upload_counter
 
-    latest_data = {
-        "timestamp": data.timestamp,
-        "values": data.values
-    }
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
 
-    history_data.append({
-        "timestamp": data.timestamp,
-        "values": data.values
-    })
+    cursor.execute("""
+        INSERT INTO sensor_data (
+            timestamp,
+            s1, s2, s3, s4,
+            s5, s6, s7, s8,
+            s9, s10, s11, s12,
+            s13, s14, s15, s16
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data.timestamp,
+        *data.values
+    ))
 
-    last_update_time = time.time()
+    conn.commit()
+    conn.close()
 
-    return {"message": "Data received successfully"}
-
+    return {"status": "success"}
 # ------------------------
 # LATEST DATA
 # ------------------------
