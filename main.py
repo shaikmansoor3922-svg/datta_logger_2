@@ -47,7 +47,6 @@ templates = Jinja2Templates(directory="templates")
 # STORAGE
 # ------------------------
 latest_data = []
-history_data = []
 last_update_time = 0
 
 
@@ -81,6 +80,7 @@ upload_counter = 0
 
 @app.post("/upload")
 def upload_data(data: SensorData):
+    global latest_data, last_update_time
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -88,12 +88,9 @@ def upload_data(data: SensorData):
     cursor.execute("""
         INSERT INTO sensor_data (
             timestamp,
-            s1, s2, s3, s4,
-            s5, s6, s7, s8,
-            s9, s10, s11, s12,
-            s13, s14, s15, s16
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            s1,s2,s3,s4,s5,s6,s7,s8,
+            s9,s10,s11,s12,s13,s14,s15,s16
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
         data.timestamp,
         *data.values
@@ -102,7 +99,15 @@ def upload_data(data: SensorData):
     conn.commit()
     conn.close()
 
-    return {"status": "success"}
+    latest_data = {
+        "timestamp": data.timestamp,
+        "values": data.values
+    }
+
+    last_update_time = time.time()
+
+    return {"message": "Data saved to DB"}
+
 # ------------------------
 # LATEST DATA
 # ------------------------
@@ -127,32 +132,41 @@ def get_history(
     limit: int = 50
 ):
 
-    # ✅ If no filter → return latest 50 only
-    if not start and not end:
-        return {"history": history_data[-limit:]}
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
 
-    filtered = []
+    query = "SELECT * FROM sensor_data"
+    conditions = []
+    params = []
 
-    # Convert start & end once (not inside loop)
-    start_time = datetime.strptime(start, "%Y-%m-%d %H:%M:%S") if start else None
-    end_time = datetime.strptime(end, "%Y-%m-%d %H:%M:%S") if end else None
+    if start:
+        conditions.append("timestamp >= ?")
+        params.append(start)
 
-    for record in history_data:
+    if end:
+        conditions.append("timestamp <= ?")
+        params.append(end)
 
-        record_time = datetime.strptime(
-            record["timestamp"],
-            "%Y-%m-%d %H:%M:%S"
-        )
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
 
-        if start_time and record_time < start_time:
-            continue
+    query += " ORDER BY id DESC LIMIT ?"
+    params.append(limit)
 
-        if end_time and record_time > end_time:
-            continue
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
 
-        filtered.append(record)
+    history = []
 
-    return {"history": filtered}
+    for row in rows:
+        history.append({
+            "timestamp": row[1],
+            "values": list(row[2:])
+        })
+
+    return {"history": history}
+
 # ------------------------
 # download
 # ------------------------
