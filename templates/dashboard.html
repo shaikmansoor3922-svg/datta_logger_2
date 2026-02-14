@@ -114,6 +114,7 @@
 
     <!-- Device Status -->
     <h3 id="deviceStatus" style="color:green;">🟢 Device Connected</h3>
+    <h3 id="rtcTime" style="color:#555;">--</h3>
 
     <!-- Button Instead of Link -->
    <button onclick="window.location.href='/history_page'">
@@ -204,12 +205,23 @@ function updateDashboard(data) {
 
 // Load Latest Data
 setInterval(async () => {
-    const response = await fetch('/latest');
-    const data = await response.json();
-    if (data.values && data.values.length === 16) {
-        updateDashboard(data.values);
+    try {
+        const response = await fetch('/latest');
+        const data = await response.json();
+
+        if (data.values && data.values.length === 16) {
+            updateDashboard(data.values);
+
+            // OPTIONAL: show RTC time on dashboard
+            if (data.timestamp) {
+                document.getElementById("rtcTime").textContent = data.timestamp;
+            }
+        }
+    } catch (error) {
+        console.log("Dashboard fetch error:", error);
     }
 }, 300);
+
 
 
 // Device Status
