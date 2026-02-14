@@ -59,7 +59,10 @@ upload_counter = 0
 def upload_data(data: SensorData):
     global latest_data, history_data, last_update_time, upload_counter
 
-    latest_data = data.values
+    latest_data = {
+        "timestamp": data.timestamp,
+        "values": data.values
+    }
 
     history_data.append({
         "timestamp": data.timestamp,
