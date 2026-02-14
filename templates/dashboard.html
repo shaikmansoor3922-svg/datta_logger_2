@@ -3,67 +3,115 @@
 <head>
     <title>Sensor Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <style>
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 20px;
-        }
-        .chart-container {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            height: 300px;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .data-table th, .data-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        .data-table th {
-            background-color: #f2f2f2;
-        }
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            height: 60px;
-            object-fit: contain;
-        }
-        .history-container {
-            display: none;
-            margin-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            background-color: #0b7dda;
-        }
-    </style>
+   <style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        background: #f4f6f9;
+        color: #333;
+    }
+
+    /* ===== HEADER ===== */
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background: linear-gradient(135deg, #1f2937, #111827);
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .header-container h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 1px;
+    }
+
+    .logo {
+        height: 60px;
+    }
+
+    /* ===== STATUS ===== */
+    #deviceStatus {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 40px;
+    }
+
+    /* ===== BUTTON ===== */
+    button {
+        margin-left: 40px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s ease;
+        box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37,99,235,0.5);
+    }
+
+    /* ===== TABLE ===== */
+    .data-table {
+        width: 95%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .data-table th {
+        background: #1f2937;
+        color: white;
+        padding: 10px;
+        font-weight: 600;
+    }
+
+    .data-table td {
+        padding: 10px;
+        text-align: center;
+    }
+
+    /* ===== CHART GRID ===== */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        padding: 30px 40px;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        height: 300px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        transition: 0.3s ease;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+</style>
 </head>
 <body>
 
- <div class="header-container">
-    <h1 style="margin:0;">Sensor Dashboard</h1>
+<div class="header-container">
+    <h1>Sensor Dashboard</h1>
     <img src="/static/logo.png" alt="MechNerve Logo" class="logo">
 </div>
+
     <!-- Device Status -->
     <h3 id="deviceStatus" style="color:green;">🟢 Device Connected</h3>
 
