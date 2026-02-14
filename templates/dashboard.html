@@ -60,8 +60,10 @@
 </head>
 <body>
 
-   <h1 style="margin:0;">Sensor Dashboard</h1>
- <img src="/static/logo.png" alt="MechNerve Logo" class="logo">
+ <div class="header-container">
+    <h1 style="margin:0;">Sensor Dashboard</h1>
+    <img src="/static/logo.png" alt="MechNerve Logo" class="logo">
+</div>
     <!-- Device Status -->
     <h3 id="deviceStatus" style="color:green;">🟢 Device Connected</h3>
 
@@ -197,20 +199,14 @@ setInterval(async () => {
 }, 1000);
 
 // Device Status
-let lastDataTime = Date.now();
-
+// Device Status (Correct Method)
 setInterval(async () => {
-    const response = await fetch('/latest');
+    const response = await fetch('/status');
     const data = await response.json();
-
-    if (data.values && data.values.length === 16) {
-        updateDashboard(data.values);
-        lastDataTime = Date.now();
-    }
 
     const status = document.getElementById("deviceStatus");
 
-    if (Date.now() - lastDataTime < 3000) {
+    if (data.device === "connected") {
         status.textContent = "🟢 Device Connected";
         status.style.color = "green";
     } else {
@@ -218,7 +214,8 @@ setInterval(async () => {
         status.style.color = "red";
     }
 
-}, 500);
+}, 1000);
+
 
 createCharts();
 
