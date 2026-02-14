@@ -31,8 +31,8 @@ last_update_time = 0
 # MODEL
 # ------------------------
 class SensorData(BaseModel):
+    timestamp: str
     values: List[float]
-
 
 # ------------------------
 # DASHBOARD PAGE
