@@ -248,8 +248,6 @@ def debug_time():
         "current_time": time.time(),
         "difference": time.time() - last_update_time
     }
-app.get("/", (req, res) => {
-  res.send("Server is running");
-});
+
 
 
