@@ -1,3 +1,4 @@
+
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
@@ -15,6 +16,7 @@ from fastapi.responses import StreamingResponse
 from io import StringIO
 import sqlite3
 from datetime import datetime
+from fastapi.responses import PlainTextResponse
 
 DB_NAME = "sensor_data.db"
 
@@ -60,7 +62,7 @@ class SensorData(BaseModel):
 # ------------------------
 # DASHBOARD PAGE
 # ------------------------
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
@@ -249,5 +251,6 @@ def debug_time():
         "difference": time.time() - last_update_time
     }
 
-
-
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health():
+    return PlainTextResponse("OK")
